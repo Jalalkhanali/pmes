@@ -23,11 +23,9 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<redisson.version>3.40.1</redisson.version>
 		<spring-cloud.vault.version>4.2.1</spring-cloud.vault.version>
-		<barook-registry.url>https://registry.barook.tech/repository/barook-common/</barook-registry.url>
-		<barook-common.version>1.0.9</barook-common.version>
+
 		<skipTests>True</skipTests>
-		<neuroph.version>2.94</neuroph.version>
-		<dl4j.version>1.0.0-M2.1</dl4j.version>
+
 		<apache-commons-math.version>3.6.1</apache-commons-math.version>
 		<apache-poi.version>5.1.0</apache-poi.version>
 	</properties>
@@ -42,18 +40,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<distributionManagement>
-		<repository>
-			<id>barook-common</id>
-			<url>${barook-registry.url}</url>
-		</repository>
-	</distributionManagement>
-	<repositories>
-		<repository>
-			<id>barook-common</id>
-			<url>${barook-registry.url}</url>
-		</repository>
-	</repositories>
+
 	<dependencies>
 		<!-- Spring Boot Starters -->
 		<dependency>
@@ -183,28 +170,11 @@
 		</dependency>
 
 		<!-- Energy Planning Dependencies -->
-		<!-- Neuroph for Artificial Neural Networks -->
+		<!-- Apache Commons Math for PSO and mathematical operations -->
 		<dependency>
-			<groupId>org.neuroph</groupId>
-			<artifactId>neuroph-core</artifactId>
-			<version>${neuroph.version}</version>
-		</dependency>
-
-		<!-- Deep Learning for Java (DL4J) for advanced neural networks -->
-		<dependency>
-			<groupId>org.deeplearning4j</groupId>
-			<artifactId>deeplearning4j-core</artifactId>
-			<version>${dl4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.deeplearning4j</groupId>
-			<artifactId>deeplearning4j-nn</artifactId>
-			<version>${dl4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native-platform</artifactId>
-			<version>1.0.0-M2.1</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>${apache-commons-math.version}</version>
 		</dependency>
 
 		<!-- Apache Commons Math for PSO and mathematical operations -->
