@@ -1,0 +1,114 @@
+spring:
+  application:
+    name: pmes-energy-planning
+
+  profiles:
+    active: energy
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/energy_planning
+    username: energy_user
+    password: energy_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    ir.aut.jalal.pmes.energy: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  file:
+    name: logs/energy-planning.log
+
+# Energy Planning Configuration
+energy:
+  neural-network:
+    pso:
+      particle-count: 30
+      iterations: 100
+      inertia-weight: 0.7
+      cognitive-weight: 1.5
+      social-weight: 1.5
+    training:
+      epochs: 500
+      learning-rate: 0.01
+      batch-size: 32
+    forecasting:
+      confidence-level: 0.95
+      max-forecast-years: 30
+
+  excel-import:
+    max-file-size: 10MB
+    supported-formats:
+      - xlsx
+      - xls
+    required-columns:
+      - year
+      - sector
+      - energy_source
+      - consumption_twh
+
+  emissions:
+    default-year: 2023
+    calculation-method: IPCC
+    include-indirect-emissions: true
+
+# API Documentation
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  packages-to-scan: ir.aut.jalal.pmes.energy.controller
+
+# Management Endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+    info:
+      enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true

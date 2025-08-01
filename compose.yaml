@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pmes-postgres
+    environment:
+      POSTGRES_DB: energy_planning
+      POSTGRES_USER: energy_user
+      POSTGRES_PASSWORD: energy_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U energy_user -d energy_planning"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pmes-app:
+    build: .
+    container_name: pmes-energy-planning
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: energy
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/energy_planning
+      SPRING_DATASOURCE_USERNAME: energy_user
+      SPRING_DATASOURCE_PASSWORD: energy_pass
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
