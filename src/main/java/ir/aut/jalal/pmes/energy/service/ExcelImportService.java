@@ -2,21 +2,20 @@ package ir.aut.jalal.pmes.energy.service;
 
 import ir.aut.jalal.pmes.energy.entity.EnergyData;
 import ir.aut.jalal.pmes.energy.repository.EnergyDataRepository;
-import lombok.extern.slf4j.Slf4j;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+
 /**
- * Service for importing energy data from Excel files
- * Supports both .xlsx and .xls formats using Apache POI
+ * Excel Import Service for energy data
+ * Supports importing energy consumption data from Excel files
  */
 @Service
 @RequiredArgsConstructor
@@ -26,185 +25,163 @@ public class ExcelImportService {
     private final EnergyDataRepository energyDataRepository;
 
     /**
-     * Import energy data from an Excel file
-     * 
-     * @param file The Excel file to import
-     * @param dataSource Source identifier for the imported data
-     * @return ImportResult containing statistics about the import
+     * Import energy data from Excel file
      */
-    @Transactional
-    public ImportResult importEnergyData(MultipartFile file, String dataSource) {
+    public ImportResult importEnergyData(MultipartFile file, String dataSource) throws IOException {
         log.info("Starting Excel import for file: {}", file.getOriginalFilename());
-        
-        ImportResult result = new ImportResult();
-        List<EnergyData> energyDataList = new ArrayList<>();
-        
-        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+
+        List<EnergyData> importedData = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        int totalRows = 0;
+        int importedRows = 0;
+
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // Use first sheet
-            
-            // Find header row and column indices
+
+            // Find header row
             Row headerRow = findHeaderRow(sheet);
             if (headerRow == null) {
-                throw new IllegalArgumentException("No header row found in Excel file");
+                throw new IllegalArgumentException("No valid header row found in Excel file");
             }
-            
-            ColumnMapping columnMapping = mapColumns(headerRow);
-            
+
+            // Map column indices
+            Map<String, Integer> columnMap = mapColumns(headerRow);
+            validateRequiredColumns(columnMap);
+
             // Process data rows
-            for (int rowIndex = headerRow.getRowNum() + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
+            for (int rowNum = headerRow.getRowNum() + 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                Row row = sheet.getRow(rowNum);
                 if (row == null) continue;
-                
+
+                totalRows++;
                 try {
-                    EnergyData energyData = parseEnergyDataRow(row, columnMapping, dataSource);
+                    EnergyData energyData = parseEnergyDataRow(row, columnMap, dataSource);
                     if (energyData != null) {
-                        energyDataList.add(energyData);
-                        result.incrementProcessedRows();
+                        importedData.add(energyData);
+                        importedRows++;
                     }
                 } catch (Exception e) {
-                    log.warn("Error parsing row {}: {}", rowIndex + 1, e.getMessage());
-                    result.incrementErrorRows();
+                    String error = String.format("Row %d: %s", rowNum + 1, e.getMessage());
+                    errors.add(error);
+                    log.warn("Error parsing row {}: {}", rowNum + 1, e.getMessage());
                 }
             }
-            
-            // Save to database
-            if (!energyDataList.isEmpty()) {
-                energyDataRepository.saveAll(energyDataList);
-                result.setImportedRows(energyDataList.size());
-                log.info("Successfully imported {} energy data records", energyDataList.size());
-            }
-            
-        } catch (IOException e) {
-            log.error("Error reading Excel file: {}", e.getMessage());
-            throw new RuntimeException("Failed to read Excel file", e);
         }
-        
-        return result;
+
+        // Save imported data
+        if (!importedData.isEmpty()) {
+            energyDataRepository.saveAll(importedData);
+            log.info("Successfully imported {} energy data records", importedData.size());
+        }
+
+        return ImportResult.builder()
+                .totalRows(totalRows)
+                .importedRows(importedRows)
+                .errors(errors)
+                .dataSource(dataSource)
+                .importedAt(LocalDateTime.now())
+                .build();
     }
 
     /**
-     * Find the header row in the Excel sheet
+     * Find the header row in the sheet
      */
     private Row findHeaderRow(Sheet sheet) {
-        for (int rowIndex = 0; rowIndex <= Math.min(10, sheet.getLastRowNum()); rowIndex++) {
-            Row row = sheet.getRow(rowIndex);
-            if (row != null && isHeaderRow(row)) {
-                return row;
+        for (int rowNum = 0; rowNum <= Math.min(10, sheet.getLastRowNum()); rowNum++) {
+            Row row = sheet.getRow(rowNum);
+            if (row != null) {
+                for (int cellNum = 0; cellNum < row.getLastCellNum(); cellNum++) {
+                    Cell cell = row.getCell(cellNum);
+                    if (cell != null && "year".equalsIgnoreCase(cell.getStringCellValue().trim())) {
+                        return row;
+                    }
+                }
             }
         }
         return null;
     }
 
     /**
-     * Check if a row is a header row
+     * Map column headers to column indices
      */
-    private boolean isHeaderRow(Row row) {
-        int headerCount = 0;
-        for (int cellIndex = 0; cellIndex < row.getLastCellNum(); cellIndex++) {
-            Cell cell = row.getCell(cellIndex);
-            if (cell != null && cell.getCellType() == CellType.STRING) {
-                String cellValue = cell.getStringCellValue().toLowerCase();
-                if (cellValue.contains("year") || cellValue.contains("sector") || 
-                    cellValue.contains("energy") || cellValue.contains("consumption")) {
-                    headerCount++;
-                }
+    private Map<String, Integer> mapColumns(Row headerRow) {
+        Map<String, Integer> columnMap = new HashMap<>();
+        
+        for (int cellNum = 0; cellNum < headerRow.getLastCellNum(); cellNum++) {
+            Cell cell = headerRow.getCell(cellNum);
+            if (cell != null) {
+                String header = cell.getStringCellValue().trim().toLowerCase();
+                columnMap.put(header, cellNum);
             }
         }
-        return headerCount >= 3; // At least 3 expected headers
+        
+        return columnMap;
     }
 
     /**
-     * Map column headers to their indices
+     * Validate that required columns are present
      */
-    private ColumnMapping mapColumns(Row headerRow) {
-        ColumnMapping mapping = new ColumnMapping();
+    private void validateRequiredColumns(Map<String, Integer> columnMap) {
+        List<String> requiredColumns = Arrays.asList("year", "sector", "energy_source", "consumption_twh");
         
-        for (int cellIndex = 0; cellIndex < headerRow.getLastCellNum(); cellIndex++) {
-            Cell cell = headerRow.getCell(cellIndex);
-            if (cell != null && cell.getCellType() == CellType.STRING) {
-                String header = cell.getStringCellValue().toLowerCase().trim();
-                
-                if (header.contains("year")) {
-                    mapping.yearColumn = cellIndex;
-                } else if (header.contains("sector")) {
-                    mapping.sectorColumn = cellIndex;
-                } else if (header.contains("energy") && header.contains("source")) {
-                    mapping.energySourceColumn = cellIndex;
-                } else if (header.contains("consumption") || header.contains("twh")) {
-                    mapping.consumptionColumn = cellIndex;
-                } else if (header.contains("gdp")) {
-                    mapping.gdpColumn = cellIndex;
-                } else if (header.contains("population")) {
-                    mapping.populationColumn = cellIndex;
-                } else if (header.contains("temperature")) {
-                    mapping.temperatureColumn = cellIndex;
-                } else if (header.contains("note")) {
-                    mapping.notesColumn = cellIndex;
-                }
+        for (String required : requiredColumns) {
+            if (!columnMap.containsKey(required)) {
+                throw new IllegalArgumentException("Required column '" + required + "' not found in Excel file");
             }
         }
-        
-        // Validate required columns
-        if (mapping.yearColumn == -1 || mapping.sectorColumn == -1 || 
-            mapping.energySourceColumn == -1 || mapping.consumptionColumn == -1) {
-            throw new IllegalArgumentException("Missing required columns: year, sector, energy source, or consumption");
-        }
-        
-        return mapping;
     }
 
     /**
      * Parse a single row of energy data
      */
-    private EnergyData parseEnergyDataRow(Row row, ColumnMapping mapping, String dataSource) {
-        // Year
-        Integer year = getIntegerCellValue(row.getCell(mapping.yearColumn));
-        if (year == null || year < 1900 || year > 2100) {
-            return null; // Skip invalid years
+    private EnergyData parseEnergyDataRow(Row row, Map<String, Integer> columnMap, String dataSource) {
+        // Extract year
+        int year = getIntValue(row, columnMap.get("year"));
+        if (year < 1900 || year > 2100) {
+            throw new IllegalArgumentException("Invalid year: " + year);
         }
-        
-        // Sector
-        String sector = getStringCellValue(row.getCell(mapping.sectorColumn));
+
+        // Extract sector
+        String sector = getStringValue(row, columnMap.get("sector"));
         if (sector == null || sector.trim().isEmpty()) {
-            return null; // Skip rows without sector
+            throw new IllegalArgumentException("Sector cannot be empty");
         }
-        
-        // Energy Source
-        String energySource = getStringCellValue(row.getCell(mapping.energySourceColumn));
+
+        // Extract energy source
+        String energySource = getStringValue(row, columnMap.get("energy_source"));
         if (energySource == null || energySource.trim().isEmpty()) {
-            return null; // Skip rows without energy source
+            throw new IllegalArgumentException("Energy source cannot be empty");
         }
-        
-        // Consumption
-        BigDecimal consumption = getBigDecimalCellValue(row.getCell(mapping.consumptionColumn));
-        if (consumption == null || consumption.compareTo(BigDecimal.ZERO) <= 0) {
-            return null; // Skip invalid consumption values
+
+        // Extract consumption
+        double consumption = getDoubleValue(row, columnMap.get("consumption_twh"));
+        if (consumption < 0) {
+            throw new IllegalArgumentException("Consumption cannot be negative");
         }
-        
-        // Optional fields
-        BigDecimal gdp = mapping.gdpColumn != -1 ? getBigDecimalCellValue(row.getCell(mapping.gdpColumn)) : null;
-        BigDecimal population = mapping.populationColumn != -1 ? getBigDecimalCellValue(row.getCell(mapping.populationColumn)) : null;
-        BigDecimal temperature = mapping.temperatureColumn != -1 ? getBigDecimalCellValue(row.getCell(mapping.temperatureColumn)) : null;
-        String notes = mapping.notesColumn != -1 ? getStringCellValue(row.getCell(mapping.notesColumn)) : null;
-        
+
+        // Create EnergyData entity
         return EnergyData.builder()
                 .year(year)
                 .sector(sector.trim())
                 .energySource(energySource.trim())
                 .consumptionTwh(consumption)
-                .gdpBillions(gdp)
-                .populationMillions(population)
-                .avgTemperatureCelsius(temperature)
-                .notes(notes)
                 .dataSource(dataSource)
+                .importedAt(LocalDateTime.now())
                 .build();
     }
 
     /**
      * Get integer value from cell
      */
-    private Integer getIntegerCellValue(Cell cell) {
-        if (cell == null) return null;
+    private int getIntValue(Row row, Integer columnIndex) {
+        if (columnIndex == null) {
+            throw new IllegalArgumentException("Column index is null");
+        }
+        
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null) {
+            throw new IllegalArgumentException("Cell is empty");
+        }
         
         switch (cell.getCellType()) {
             case NUMERIC:
@@ -213,86 +190,127 @@ public class ExcelImportService {
                 try {
                     return Integer.parseInt(cell.getStringCellValue().trim());
                 } catch (NumberFormatException e) {
-                    return null;
+                    throw new IllegalArgumentException("Cannot parse integer from: " + cell.getStringCellValue());
                 }
             default:
-                return null;
+                throw new IllegalArgumentException("Cell type not supported for integer");
         }
     }
 
     /**
      * Get string value from cell
      */
-    private String getStringCellValue(Cell cell) {
-        if (cell == null) return null;
+    private String getStringValue(Row row, Integer columnIndex) {
+        if (columnIndex == null) {
+            throw new IllegalArgumentException("Column index is null");
+        }
+        
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null) {
+            return null;
+        }
         
         switch (cell.getCellType()) {
             case STRING:
                 return cell.getStringCellValue();
             case NUMERIC:
-                return String.valueOf(cell.getNumericCellValue());
+                return String.valueOf((int) cell.getNumericCellValue());
             default:
-                return null;
+                throw new IllegalArgumentException("Cell type not supported for string");
         }
     }
 
     /**
-     * Get BigDecimal value from cell
+     * Get double value from cell
      */
-    private BigDecimal getBigDecimalCellValue(Cell cell) {
-        if (cell == null) return null;
+    private double getDoubleValue(Row row, Integer columnIndex) {
+        if (columnIndex == null) {
+            throw new IllegalArgumentException("Column index is null");
+        }
+        
+        Cell cell = row.getCell(columnIndex);
+        if (cell == null) {
+            throw new IllegalArgumentException("Cell is empty");
+        }
         
         switch (cell.getCellType()) {
             case NUMERIC:
-                return BigDecimal.valueOf(cell.getNumericCellValue());
+                return cell.getNumericCellValue();
             case STRING:
                 try {
-                    return new BigDecimal(cell.getStringCellValue().trim());
+                    return Double.parseDouble(cell.getStringCellValue().trim());
                 } catch (NumberFormatException e) {
-                    return null;
+                    throw new IllegalArgumentException("Cannot parse double from: " + cell.getStringCellValue());
                 }
             default:
-                return null;
+                throw new IllegalArgumentException("Cell type not supported for double");
         }
     }
 
     /**
-     * Column mapping for Excel import
-     */
-    private static class ColumnMapping {
-        int yearColumn = -1;
-        int sectorColumn = -1;
-        int energySourceColumn = -1;
-        int consumptionColumn = -1;
-        int gdpColumn = -1;
-        int populationColumn = -1;
-        int temperatureColumn = -1;
-        int notesColumn = -1;
-    }
-
-    /**
-     * Result of Excel import operation
+     * Import result container
      */
     public static class ImportResult {
-        private int processedRows = 0;
-        private int importedRows = 0;
-        private int errorRows = 0;
-        private LocalDateTime importTime = LocalDateTime.now();
+        private final int totalRows;
+        private final int importedRows;
+        private final List<String> errors;
+        private final String dataSource;
+        private final LocalDateTime importedAt;
 
-        public void incrementProcessedRows() {
-            processedRows++;
+        private ImportResult(Builder builder) {
+            this.totalRows = builder.totalRows;
+            this.importedRows = builder.importedRows;
+            this.errors = builder.errors;
+            this.dataSource = builder.dataSource;
+            this.importedAt = builder.importedAt;
         }
 
-        public void incrementErrorRows() {
-            errorRows++;
-        }
-
-        // Getters and setters
-        public int getProcessedRows() { return processedRows; }
+        // Getters
+        public int getTotalRows() { return totalRows; }
         public int getImportedRows() { return importedRows; }
-        public int getErrorRows() { return errorRows; }
-        public LocalDateTime getImportTime() { return importTime; }
-        
-        public void setImportedRows(int importedRows) { this.importedRows = importedRows; }
+        public List<String> getErrors() { return errors; }
+        public String getDataSource() { return dataSource; }
+        public LocalDateTime getImportedAt() { return importedAt; }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+            private int totalRows;
+            private int importedRows;
+            private List<String> errors = new ArrayList<>();
+            private String dataSource;
+            private LocalDateTime importedAt;
+
+            public Builder totalRows(int totalRows) {
+                this.totalRows = totalRows;
+                return this;
+            }
+
+            public Builder importedRows(int importedRows) {
+                this.importedRows = importedRows;
+                return this;
+            }
+
+            public Builder errors(List<String> errors) {
+                this.errors = errors;
+                return this;
+            }
+
+            public Builder dataSource(String dataSource) {
+                this.dataSource = dataSource;
+                return this;
+            }
+
+            public Builder importedAt(LocalDateTime importedAt) {
+                this.importedAt = importedAt;
+                return this;
+            }
+
+            public ImportResult build() {
+                return new ImportResult(this);
+            }
+        }
     }
 } 

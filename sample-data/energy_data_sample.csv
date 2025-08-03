@@ -1,28 +1,31 @@
-year,sector,energy_source,consumption_twh,gdp_billions,population_millions,avg_temperature_celsius,notes
-2020,INDUSTRIAL,COAL,150.5,2500.0,85.0,15.2,Industrial coal consumption
-2020,INDUSTRIAL,GAS,120.3,2500.0,85.0,15.2,Industrial gas consumption
-2020,INDUSTRIAL,RENEWABLES,45.8,2500.0,85.0,15.2,Industrial renewable energy
-2020,RESIDENTIAL,COAL,45.2,2500.0,85.0,15.2,Residential coal consumption
-2020,RESIDENTIAL,GAS,85.7,2500.0,85.0,15.2,Residential gas consumption
-2020,RESIDENTIAL,RENEWABLES,12.3,2500.0,85.0,15.2,Residential renewable energy
-2020,COMMERCIAL,COAL,25.1,2500.0,85.0,15.2,Commercial coal consumption
-2020,COMMERCIAL,GAS,65.4,2500.0,85.0,15.2,Commercial gas consumption
-2020,COMMERCIAL,RENEWABLES,8.9,2500.0,85.0,15.2,Commercial renewable energy
-2021,INDUSTRIAL,COAL,148.7,2550.0,85.5,15.5,Industrial coal consumption
-2021,INDUSTRIAL,GAS,125.6,2550.0,85.5,15.5,Industrial gas consumption
-2021,INDUSTRIAL,RENEWABLES,48.2,2550.0,85.5,15.5,Industrial renewable energy
-2021,RESIDENTIAL,COAL,44.8,2550.0,85.5,15.5,Residential coal consumption
-2021,RESIDENTIAL,GAS,88.3,2550.0,85.5,15.5,Residential gas consumption
-2021,RESIDENTIAL,RENEWABLES,13.1,2550.0,85.5,15.5,Residential renewable energy
-2021,COMMERCIAL,COAL,24.6,2550.0,85.5,15.5,Commercial coal consumption
-2021,COMMERCIAL,GAS,67.2,2550.0,85.5,15.5,Commercial gas consumption
-2021,COMMERCIAL,RENEWABLES,9.4,2550.0,85.5,15.5,Commercial renewable energy
-2022,INDUSTRIAL,COAL,145.2,2600.0,86.0,15.8,Industrial coal consumption
-2022,INDUSTRIAL,GAS,130.8,2600.0,86.0,15.8,Industrial gas consumption
-2022,INDUSTRIAL,RENEWABLES,51.5,2600.0,86.0,15.8,Industrial renewable energy
-2022,RESIDENTIAL,COAL,43.5,2600.0,86.0,15.8,Residential coal consumption
-2022,RESIDENTIAL,GAS,90.1,2600.0,86.0,15.8,Residential gas consumption
-2022,RESIDENTIAL,RENEWABLES,14.2,2600.0,86.0,15.8,Residential renewable energy
-2022,COMMERCIAL,COAL,24.1,2600.0,86.0,15.8,Commercial coal consumption
-2022,COMMERCIAL,GAS,68.9,2600.0,86.0,15.8,Commercial gas consumption
-2022,COMMERCIAL,RENEWABLES,10.1,2600.0,86.0,15.8,Commercial renewable energy 
+year,sector,energy_source,consumption_twh
+2020,Industrial,Electricity,150.5
+2020,Industrial,Natural Gas,120.3
+2020,Industrial,Coal,200.7
+2020,Residential,Electricity,85.2
+2020,Residential,Natural Gas,45.8
+2020,Commercial,Electricity,65.4
+2020,Commercial,Natural Gas,35.6
+2020,Transportation,Oil,180.3
+2020,Agriculture,Electricity,25.1
+2020,Agriculture,Natural Gas,15.4
+2021,Industrial,Electricity,155.2
+2021,Industrial,Natural Gas,125.8
+2021,Industrial,Coal,195.3
+2021,Residential,Electricity,87.6
+2021,Residential,Natural Gas,47.2
+2021,Commercial,Electricity,67.8
+2021,Commercial,Natural Gas,37.4
+2021,Transportation,Oil,182.1
+2021,Agriculture,Electricity,26.3
+2021,Agriculture,Natural Gas,16.1
+2022,Industrial,Electricity,160.8
+2022,Industrial,Natural Gas,130.5
+2022,Industrial,Coal,190.1
+2022,Residential,Electricity,90.2
+2022,Residential,Natural Gas,48.9
+2022,Commercial,Electricity,70.3
+2022,Commercial,Natural Gas,39.2
+2022,Transportation,Oil,184.7
+2022,Agriculture,Electricity,27.5
+2022,Agriculture,Natural Gas,16.8 

@@ -1,42 +1,42 @@
 # PMES - Energy Planning System
 
-A professional energy planning software similar to LEAP (Long-range Energy Alternatives Planning) built with Java 21 + Spring Boot, featuring Artificial Neural Network forecasting with Particle Swarm Optimization.
+A professional energy planning software similar to LEAP (Long-range Energy Alternatives Planning) with Artificial Neural Network (ANN) forecasting and Particle Swarm Optimization (PSO) capabilities.
 
-## 🎯 Features
+## 🚀 Features
 
-- **Excel Data Import**: Import energy consumption data from Excel files using Apache POI
-- **ANN Forecasting**: Artificial Neural Network forecasting for 30-year projections using Neuroph and DL4J
-- **PSO Optimization**: Particle Swarm Optimization to optimize neural network architecture
-- **Scenario Management**: Create and manage energy planning scenarios (renewables boost, coal phaseout, etc.)
-- **Emission Calculations**: Calculate CO2, NOx, SO2 emissions from forecast results
-- **REST API**: Complete REST API ready for Next.js frontend integration
-- **Docker Support**: Fully containerized with Docker and Docker Compose
-- **PostgreSQL Database**: Robust data storage with optimized indexes
+### Core Functionality
+- **Energy Data Import**: Excel file import with validation and error handling
+- **Neural Network Forecasting**: ANN-based energy demand forecasting with PSO optimization
+- **Scenario Management**: Create, manage, and compare different energy planning scenarios
+- **Emissions Calculation**: CO2 emissions calculation using emission factors
+- **RESTful API**: Comprehensive REST API with Swagger documentation
 
-## 🛠 Tech Stack
+### Advanced Capabilities
+- **Particle Swarm Optimization**: Optimizes neural network weights for better forecasting accuracy
+- **Multi-sector Analysis**: Support for Industrial, Residential, Commercial, Transportation, and Agriculture sectors
+- **Energy Source Modeling**: Electricity, Natural Gas, Oil, Coal, and Renewables
+- **Scenario Comparison**: Compare emissions and energy consumption between scenarios
+- **Excel Integration**: Import historical energy data from Excel files
 
-- **Java 21** - Latest LTS version
-- **Spring Boot 3** - Modern Spring framework
-- **Spring Data JPA** - Database abstraction
-- **PostgreSQL** - Primary database
-- **Neuroph** - Artificial Neural Networks
-- **DL4J** - Deep Learning for Java
-- **Apache POI** - Excel file processing
-- **Apache Commons Math** - PSO algorithm implementation
-- **Lombok** - Code generation
-- **Docker** - Containerization
-- **Liquibase** - Database migrations
+## 🛠️ Technology Stack
+
+- **Backend**: Spring Boot 3.2.2 with Java 21
+- **Database**: PostgreSQL 15
+- **AI/ML**: Apache Commons Math for PSO and mathematical operations
+- **Documentation**: SpringDoc OpenAPI (Swagger)
+- **Containerization**: Docker with Docker Compose
+- **Build Tool**: Maven
 
 ## 📋 Prerequisites
 
-- Java 21 JDK
-- Docker and Docker Compose
+- Java 21 or higher
 - Maven 3.8+
-- PostgreSQL 15+ (if running locally)
+- Docker and Docker Compose (for containerized deployment)
+- PostgreSQL 15 (if running locally)
 
 ## 🚀 Quick Start
 
-### Using Docker (Recommended)
+### Option 1: Using Docker (Recommended)
 
 1. **Clone the repository**
    ```bash
@@ -50,11 +50,11 @@ A professional energy planning software similar to LEAP (Long-range Energy Alter
    ```
 
 3. **Access the application**
-   - API: http://localhost:8080
+   - Application: http://localhost:8080
    - Swagger UI: http://localhost:8080/swagger-ui.html
    - Health Check: http://localhost:8080/actuator/health
 
-### Manual Setup
+### Option 2: Local Development
 
 1. **Set up PostgreSQL database**
    ```sql
@@ -65,257 +65,140 @@ A professional energy planning software similar to LEAP (Long-range Energy Alter
 
 2. **Run the application**
    ```bash
-   mvn spring-boot:run
+   ./start.sh
    ```
 
 ## 📊 API Endpoints
 
-### Excel Import
-```
-POST /api/energy/import/excel
-Content-Type: multipart/form-data
-Parameters:
-- file: Excel file (.xlsx, .xls)
-- dataSource: Source identifier (optional)
-```
+### Energy Data Import
+- `POST /api/energy/import/excel` - Import energy data from Excel file
 
 ### Forecasting
-```
-POST /api/energy/forecast/baseline
-Content-Type: application/json
-Body: {
-  "sectors": ["INDUSTRIAL", "RESIDENTIAL"],
-  "energySources": ["COAL", "GAS", "RENEWABLES"],
-  "forecastYears": 30,
-  "startYear": 2020,
-  "endYear": 2050
-}
-```
+- `POST /api/energy/forecast/baseline` - Baseline energy demand forecasting
+- `POST /api/energy/scenarios/{scenarioId}/forecast` - Scenario-based forecasting
 
 ### Scenario Management
-```
-GET    /api/energy/scenarios                    # List all scenarios
-POST   /api/energy/scenarios                    # Create scenario
-GET    /api/energy/scenarios/{id}               # Get scenario
-PUT    /api/energy/scenarios/{id}               # Update scenario
-DELETE /api/energy/scenarios/{id}               # Delete scenario
-POST   /api/energy/scenarios/{id}/activate      # Activate scenario
-```
-
-### Scenario-based Forecasting
-```
-POST /api/energy/scenarios/{scenarioId}/forecast
-Content-Type: application/json
-Body: {
-  "sectors": ["INDUSTRIAL", "RESIDENTIAL"],
-  "energySources": ["COAL", "GAS", "RENEWABLES"],
-  "forecastYears": 30
-}
-```
+- `GET /api/energy/scenarios` - Get all scenarios
+- `POST /api/energy/scenarios` - Create new scenario
+- `GET /api/energy/scenarios/{id}` - Get scenario by ID
+- `PUT /api/energy/scenarios/{id}` - Update scenario
+- `DELETE /api/energy/scenarios/{id}` - Delete scenario
+- `POST /api/energy/scenarios/{id}/activate` - Activate scenario
 
 ### Emissions Calculation
-```
-GET /api/energy/scenarios/{scenarioId}/emissions                    # Calculate emissions
-GET /api/energy/scenarios/{scenarioId}/emissions/yearly            # Yearly emissions
-GET /api/energy/scenarios/{scenarioId}/emissions/sector            # Sector emissions
-GET /api/energy/scenarios/{scenarioId}/emissions/energy-source     # Energy source emissions
-GET /api/energy/emissions/compare?scenario1Id=1&scenario2Id=2     # Compare scenarios
-```
+- `GET /api/energy/scenarios/{scenarioId}/emissions` - Calculate emissions for scenario
+- `GET /api/energy/scenarios/{scenarioId}/emissions/range` - Calculate emissions for year range
+- `GET /api/energy/scenarios/{scenarioId}/emissions/yearly` - Get yearly emissions
+- `GET /api/energy/scenarios/{scenarioId}/emissions/sector` - Get emissions by sector
+- `GET /api/energy/scenarios/{scenarioId}/emissions/energy-source` - Get emissions by energy source
+- `GET /api/energy/emissions/compare` - Compare emissions between scenarios
 
-### Combined Forecasting with Emissions
-```
-POST /api/energy/scenarios/{scenarioId}/forecast-with-emissions
-Content-Type: application/json
-Body: {
-  "sectors": ["INDUSTRIAL", "RESIDENTIAL"],
-  "energySources": ["COAL", "GAS", "RENEWABLES"],
-  "forecastYears": 30
-}
-```
+### Combined Operations
+- `POST /api/energy/scenarios/{scenarioId}/forecast-with-emissions` - Combined forecast and emissions
 
-### Data Management
-```
-GET    /api/energy/data/energy                    # List energy data
-POST   /api/energy/data/energy                    # Create energy data
-GET    /api/energy/data/emission-factors          # List emission factors
-POST   /api/energy/data/emission-factors          # Create emission factor
-```
-
-## 📈 Excel Import Format
-
-The system expects Excel files with the following columns:
-
-| Column | Required | Description |
-|--------|----------|-------------|
-| year | Yes | Year of the data (1900-2100) |
-| sector | Yes | Energy sector (INDUSTRIAL, RESIDENTIAL, etc.) |
-| energy_source | Yes | Energy source (COAL, GAS, RENEWABLES, etc.) |
-| consumption_twh | Yes | Energy consumption in TWh |
-| gdp_billions | No | GDP in billions |
-| population_millions | No | Population in millions |
-| avg_temperature_celsius | No | Average temperature in Celsius |
-| notes | No | Additional notes |
-
-### Sample Excel Data
-```
-year,sector,energy_source,consumption_twh,gdp_billions,population_millions
-2020,INDUSTRIAL,COAL,150.5,2500.0,85.0
-2020,INDUSTRIAL,GAS,120.3,2500.0,85.0
-2020,RESIDENTIAL,COAL,45.2,2500.0,85.0
-2021,INDUSTRIAL,COAL,148.7,2550.0,85.5
-```
-
-## 🧠 Neural Network Architecture
-
-The system uses a multi-layer perceptron with:
-- **Input Layer**: 16 neurons (4 years × 4 features per year)
-- **Hidden Layer 1**: 10-100 neurons (optimized by PSO)
-- **Hidden Layer 2**: 5-50 neurons (optimized by PSO)
-- **Output Layer**: 1 neuron (energy consumption forecast)
-
-### PSO Optimization Parameters
-- **Particle Count**: 30
-- **Iterations**: 100
-- **Inertia Weight**: 0.7
-- **Cognitive Weight**: 1.5
-- **Social Weight**: 1.5
-
-## 🌍 Emission Factors
-
-The system includes comprehensive emission factors for:
-- **Fossil Fuels**: Coal, Gas, Oil
-- **Renewables**: Solar, Wind, Hydro, Biomass, Geothermal
-- **Nuclear**: Pressurized water reactors
-- **Emerging Technologies**: Hydrogen, CCS, BECCS
-
-### Sample Emission Factors (kg CO2/TWh)
-- Coal (Industrial): 820
-- Gas (Combined Cycle): 490
-- Solar (Photovoltaic): 45
-- Wind (Onshore): 11
-- Nuclear: 12
-- Hydro: 4
-
-## 🏗 Project Structure
+## 📁 Project Structure
 
 ```
-src/main/java/ir/aut/jalal/pmes/energy/
-├── controller/
-│   ├── EnergyController.java          # Main energy planning endpoints
-│   └── DataController.java            # Data management endpoints
-├── entity/
-│   ├── EnergyData.java               # Energy consumption data
-│   ├── Scenario.java                 # Energy planning scenarios
-│   ├── EmissionFactor.java           # Emission factors
-│   └── ForecastResult.java           # Forecast results
-├── repository/
-│   ├── EnergyDataRepository.java     # Energy data queries
-│   ├── ScenarioRepository.java       # Scenario queries
-│   ├── EmissionFactorRepository.java # Emission factor queries
-│   └── ForecastResultRepository.java # Forecast result queries
-└── service/
-    ├── ExcelImportService.java       # Excel file processing
-    ├── NeuralNetworkService.java     # ANN forecasting
-    ├── ParticleSwarmOptimizationService.java # PSO optimization
-    ├── ScenarioService.java          # Scenario management
-    └── EmissionService.java          # Emission calculations
+pmes/
+├── src/main/java/ir/aut/jalal/pmes/energy/
+│   ├── config/           # Configuration classes
+│   ├── controller/       # REST controllers
+│   ├── entity/          # JPA entities
+│   ├── repository/      # Data repositories
+│   └── service/         # Business logic services
+├── src/main/resources/
+│   ├── application.yml  # Application configuration
+│   └── db/changelog/    # Database migrations
+├── sample-data/         # Sample energy data
+├── compose.yaml         # Docker Compose configuration
+├── Dockerfile          # Docker image definition
+├── start.sh           # Startup script
+└── README.md          # This file
 ```
 
-## 📊 Sample Usage
+## 🔧 Configuration
+
+### Application Properties
+Key configuration options in `application.yml`:
+
+```yaml
+energy:
+  neural-network:
+    pso:
+      particle-count: 30
+      iterations: 100
+      inertia-weight: 0.7
+      cognitive-weight: 1.5
+      social-weight: 1.5
+    training:
+      epochs: 500
+      learning-rate: 0.01
+      batch-size: 32
+    forecasting:
+      confidence-level: 0.95
+      max-forecast-years: 30
+```
+
+### Database Configuration
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/energy_planning
+    username: energy_user
+    password: energy_pass
+```
+
+## 📈 Usage Examples
 
 ### 1. Import Energy Data
 ```bash
-curl -X POST http://localhost:8080/api/energy/import/excel \
-  -F "file=@energy_data.xlsx" \
-  -F "dataSource=Sample Import"
+curl -X POST "http://localhost:8080/api/energy/import/excel" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@sample-data/energy_data_sample.csv" \
+  -F "dataSource=Sample Data"
 ```
 
 ### 2. Create a Scenario
 ```bash
-curl -X POST http://localhost:8080/api/energy/scenarios \
+curl -X POST "http://localhost:8080/api/energy/scenarios" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Renewables Boost",
+    "name": "High Renewables Scenario",
     "description": "Scenario with increased renewable energy deployment",
-    "scenarioType": "POLICY_CHANGE",
-    "startYear": 2020,
+    "startYear": 2023,
     "endYear": 2050,
-    "gdpGrowthRate": 2.5,
-    "renewableTarget": 40.0,
-    "carbonPrice": 50.0
+    "sectorGrowthRates": {
+      "Industrial": 0.02,
+      "Residential": 0.015
+    },
+    "energySourceAdjustments": {
+      "Renewables": 0.1,
+      "Coal": -0.05
+    }
   }'
 ```
 
-### 3. Run Baseline Forecast
+### 3. Run Forecasting
 ```bash
-curl -X POST http://localhost:8080/api/energy/forecast/baseline \
+curl -X POST "http://localhost:8080/api/energy/forecast/baseline" \
   -H "Content-Type: application/json" \
   -d '{
-    "sectors": ["INDUSTRIAL", "RESIDENTIAL"],
-    "energySources": ["COAL", "GAS", "RENEWABLES"],
-    "forecastYears": 30,
-    "startYear": 2020,
-    "endYear": 2050
+    "sectors": ["Industrial", "Residential"],
+    "energySources": ["Electricity", "Natural Gas"],
+    "forecastYears": 10,
+    "startYear": 2023,
+    "endYear": 2033
   }'
 ```
 
 ### 4. Calculate Emissions
 ```bash
-curl -X GET http://localhost:8080/api/energy/scenarios/1/emissions
-```
-
-## 🐳 Docker Commands
-
-### Build and Run
-```bash
-# Build the application
-docker-compose build
-
-# Start all services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f pmes-app
-
-# Stop all services
-docker-compose down
-```
-
-### Database Access
-```bash
-# Connect to PostgreSQL
-docker-compose exec postgres psql -U energy_user -d energy_planning
-
-# View database logs
-docker-compose logs postgres
-```
-
-## 🔍 Monitoring
-
-### Health Checks
-```bash
-# Application health
-curl http://localhost:8080/actuator/health
-
-# Database health
-curl http://localhost:8080/actuator/health/db
-
-# Disk space
-curl http://localhost:8080/actuator/health/diskSpace
-```
-
-### Metrics
-```bash
-# Application metrics
-curl http://localhost:8080/actuator/metrics
-
-# JVM metrics
-curl http://localhost:8080/actuator/metrics/jvm.memory.used
+curl -X GET "http://localhost:8080/api/energy/scenarios/1/emissions"
 ```
 
 ## 🧪 Testing
 
-### Unit Tests
+### Run Tests
 ```bash
 mvn test
 ```
@@ -325,58 +208,38 @@ mvn test
 mvn test -Dtest=*IntegrationTest
 ```
 
-### API Tests
-```bash
-# Test Excel import
-curl -X POST http://localhost:8080/api/energy/import/excel \
-  -F "file=@test_data.xlsx"
+## 📊 Monitoring
 
-# Test forecasting
-curl -X POST http://localhost:8080/api/energy/forecast/baseline \
-  -H "Content-Type: application/json" \
-  -d @test_forecast_request.json
-```
+### Health Checks
+- Application health: `GET /actuator/health`
+- Database health: `GET /actuator/health/db`
+- Custom metrics: `GET /actuator/metrics`
 
-## 📚 API Documentation
-
-Once the application is running, you can access:
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **OpenAPI JSON**: http://localhost:8080/api-docs
+### Logs
+Application logs are written to `logs/energy-planning.log`
 
 ## 🔒 Security
 
-The system includes basic security features:
-- Input validation
-- SQL injection prevention
-- File upload restrictions
-- CORS configuration
+The application includes:
+- Spring Security configuration
+- Input validation and sanitization
+- SQL injection prevention through JPA
+- File upload security measures
 
-For production deployment, consider adding:
-- JWT authentication
-- Role-based access control
-- API rate limiting
-- HTTPS enforcement
+## 🚀 Deployment
 
-## 🚀 Production Deployment
+### Production Deployment
+1. Set environment variables for production database
+2. Configure logging levels
+3. Set up monitoring and alerting
+4. Use production Docker Compose configuration
 
 ### Environment Variables
 ```bash
-export SPRING_PROFILES_ACTIVE=production
-export SPRING_DATASOURCE_URL=jdbc:postgresql://prod-db:5432/energy_planning
-export SPRING_DATASOURCE_USERNAME=prod_user
-export SPRING_DATASOURCE_PASSWORD=prod_password
-```
-
-### Docker Production
-```bash
-# Build production image
-docker build -t energy-planning:latest .
-
-# Run with production config
-docker run -d \
-  -p 8080:8080 \
-  -e SPRING_PROFILES_ACTIVE=production \
-  energy-planning:latest
+SPRING_PROFILES_ACTIVE=production
+SPRING_DATASOURCE_URL=jdbc:postgresql://prod-db:5432/energy_planning
+SPRING_DATASOURCE_USERNAME=prod_user
+SPRING_DATASOURCE_PASSWORD=prod_pass
 ```
 
 ## 🤝 Contributing
@@ -384,10 +247,10 @@ docker run -d \
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests
+4. Add tests for new functionality
 5. Submit a pull request
 
-## 📄 License
+## 📝 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
@@ -395,11 +258,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions:
 - Create an issue in the repository
-- Check the API documentation at http://localhost:8080/swagger-ui.html
-- Review the logs at `logs/energy-planning.log`
+- Check the Swagger documentation at `/swagger-ui.html`
+- Review the application logs
 
 ## 🔄 Version History
 
-- **v1.0.0** - Initial release with basic energy planning features
-- **v1.1.0** - Added PSO optimization and improved neural networks
-- **v1.2.0** - Enhanced emission calculations and scenario management 
+- **v1.0.0**: Initial release with core energy planning functionality
+- Neural Network forecasting with PSO optimization
+- Scenario management and comparison
+- Emissions calculation
+- Excel data import
+- RESTful API with Swagger documentation 
