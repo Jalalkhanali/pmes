@@ -1,6 +1,11 @@
-package ir.aut.jalal.pmes.energy.controller;
+package aut.energy.controller;
 
-import ir.aut.jalal.pmes.energy.entity.Scenario;
+import aut.energy.entity.ForecastResult;
+import aut.energy.entity.Scenario;
+import aut.energy.service.EmissionService;
+import aut.energy.service.ExcelImportService;
+import aut.energy.service.NeuralNetworkService;
+import aut.energy.service.ScenarioService;
 import ir.aut.jalal.pmes.energy.service.*;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +67,7 @@ public class EnergyController {
      * @return List of forecast results
      */
     @PostMapping("/forecast/baseline")
-    public ResponseEntity<List<ir.aut.jalal.pmes.energy.entity.ForecastResult>> forecastBaseline(
+    public ResponseEntity<List<ForecastResult>> forecastBaseline(
             @RequestBody BaselineForecastRequest request) {
         
         log.info("Received baseline forecast request for sectors: {}, energy sources: {}", 
@@ -72,7 +77,7 @@ public class EnergyController {
             // Create or get baseline scenario
             Scenario baselineScenario = getOrCreateBaselineScenario(request.getStartYear(), request.getEndYear());
             
-            List<ir.aut.jalal.pmes.energy.entity.ForecastResult> results = 
+            List<ForecastResult> results =
                     neuralNetworkService.forecastEnergyDemand(
                             baselineScenario, 
                             request.getSectors(), 
@@ -199,7 +204,7 @@ public class EnergyController {
      * @return List of forecast results
      */
     @PostMapping("/scenarios/{scenarioId}/forecast")
-    public ResponseEntity<List<ir.aut.jalal.pmes.energy.entity.ForecastResult>> forecastUnderScenario(
+    public ResponseEntity<List<ForecastResult>> forecastUnderScenario(
             @PathVariable Long scenarioId,
             @RequestBody ScenarioForecastRequest request) {
         
@@ -212,7 +217,7 @@ public class EnergyController {
             }
             
             Scenario scenario = scenarioOpt.get();
-            List<ir.aut.jalal.pmes.energy.entity.ForecastResult> results = 
+            List<ForecastResult> results =
                     neuralNetworkService.forecastEnergyDemand(
                             scenario, 
                             request.getSectors(), 
@@ -379,7 +384,7 @@ public class EnergyController {
             Scenario scenario = scenarioOpt.get();
             
             // Run forecast
-            List<ir.aut.jalal.pmes.energy.entity.ForecastResult> forecastResults = 
+            List<ForecastResult> forecastResults =
                     neuralNetworkService.forecastEnergyDemand(
                             scenario, 
                             request.getSectors(), 
@@ -489,7 +494,7 @@ public class EnergyController {
      */
     public static class CombinedForecastResponse {
         private Scenario scenario;
-        private List<ir.aut.jalal.pmes.energy.entity.ForecastResult> forecastResults;
+        private List<ForecastResult> forecastResults;
         private List<EmissionService.EmissionCalculation> emissionCalculations;
 
         // Builder pattern
@@ -501,8 +506,8 @@ public class EnergyController {
         public Scenario getScenario() { return scenario; }
         public void setScenario(Scenario scenario) { this.scenario = scenario; }
         
-        public List<ir.aut.jalal.pmes.energy.entity.ForecastResult> getForecastResults() { return forecastResults; }
-        public void setForecastResults(List<ir.aut.jalal.pmes.energy.entity.ForecastResult> forecastResults) { this.forecastResults = forecastResults; }
+        public List<ForecastResult> getForecastResults() { return forecastResults; }
+        public void setForecastResults(List<ForecastResult> forecastResults) { this.forecastResults = forecastResults; }
         
         public List<EmissionService.EmissionCalculation> getEmissionCalculations() { return emissionCalculations; }
         public void setEmissionCalculations(List<EmissionService.EmissionCalculation> emissionCalculations) { this.emissionCalculations = emissionCalculations; }
@@ -515,7 +520,7 @@ public class EnergyController {
                 return this;
             }
 
-            public CombinedForecastResponseBuilder forecastResults(List<ir.aut.jalal.pmes.energy.entity.ForecastResult> forecastResults) {
+            public CombinedForecastResponseBuilder forecastResults(List<ForecastResult> forecastResults) {
                 response.forecastResults = forecastResults;
                 return this;
             }

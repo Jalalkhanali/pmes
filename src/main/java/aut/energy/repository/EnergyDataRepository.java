@@ -1,6 +1,6 @@
-package ir.aut.jalal.pmes.energy.repository;
+package aut.energy.repository;
 
-import ir.aut.jalal.pmes.energy.entity.EnergyData;
+import aut.energy.entity.EnergyData;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
-package ir.aut.jalal.pmes.energy.repository;
+package aut.energy.repository;
 
-import ir.aut.jalal.pmes.energy.entity.EmissionFactor;
+import aut.energy.entity.EmissionFactor;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;

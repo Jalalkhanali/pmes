@@ -1,4 +1,4 @@
-package ir.aut.jalal.pmes.energy.config;
+package aut.energy.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

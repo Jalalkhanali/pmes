@@ -1,7 +1,7 @@
-package ir.aut.jalal.pmes.energy.repository;
+package aut.energy.repository;
 
-import ir.aut.jalal.pmes.energy.entity.ForecastResult;
-import ir.aut.jalal.pmes.energy.entity.Scenario;
+import aut.energy.entity.ForecastResult;
+import aut.energy.entity.Scenario;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;

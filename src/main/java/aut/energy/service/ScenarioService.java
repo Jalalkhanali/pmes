@@ -1,7 +1,7 @@
-package ir.aut.jalal.pmes.energy.service;
+package aut.energy.service;
 
-import ir.aut.jalal.pmes.energy.entity.Scenario;
-import ir.aut.jalal.pmes.energy.repository.ScenarioRepository;
+import aut.energy.entity.Scenario;
+import aut.energy.repository.ScenarioRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

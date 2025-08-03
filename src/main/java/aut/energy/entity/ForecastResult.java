@@ -1,4 +1,4 @@
-package ir.aut.jalal.pmes.energy.entity;
+package aut.energy.entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;

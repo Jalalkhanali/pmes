@@ -1,4 +1,4 @@
-package ir.aut.jalal.pmes.energy.config;
+package aut.energy.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
