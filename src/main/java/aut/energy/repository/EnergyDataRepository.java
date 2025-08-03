@@ -102,4 +102,11 @@ public interface EnergyDataRepository extends JpaRepository<EnergyData, Long> {
      * Delete energy data by data source (useful for cleaning up imported data)
      */
     void deleteByDataSource(String dataSource);
+
+    // Find all data for multiple sectors & energy sources
+    List<EnergyData> findBySectorsAndEnergySources(List<String> sectors, List<String> energySources);
+
+    // Find latest record for a sector-energy source combo
+    Optional<EnergyData> findTopBySectorAndEnergySourceOrderByYearDesc(String sector, String energySource);
+
 } 

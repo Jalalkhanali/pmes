@@ -5,6 +5,7 @@ import aut.energy.entity.ForecastResult;
 import aut.energy.entity.Scenario;
 import aut.energy.repository.EnergyDataRepository;
 import aut.energy.repository.ForecastResultRepository;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -107,11 +108,11 @@ public class NeuralNetworkService {
                         normalizeYear(current.getYear()),
                         encodeSector(current.getSector()),
                         encodeEnergySource(current.getEnergySource()),
-                        normalizeConsumption(previous.getConsumptionTwh())
+                        normalizeConsumption(previous.getConsumptionTwh().doubleValue())
                 };
 
                 // Output: current consumption
-                double[] output = {normalizeConsumption(current.getConsumptionTwh())};
+                double[] output = {normalizeConsumption(current.getConsumptionTwh().doubleValue())};
 
                 inputs.add(input);
                 outputs.add(output);
@@ -175,7 +176,7 @@ public class NeuralNetworkService {
         }
 
         EnergyData latest = latestData.get();
-        double currentConsumption = latest.getConsumptionTwh();
+        double currentConsumption = latest.getConsumptionTwh().doubleValue();
         int currentYear = latest.getYear();
 
         // Generate forecasts for each future year
@@ -203,9 +204,9 @@ public class NeuralNetworkService {
                     .scenario(scenario)
                     .sector(sector)
                     .energySource(energySource)
-                    .year(forecastYear)
-                    .forecastedConsumptionTwh(forecastedConsumption)
-                    .confidenceLevel(0.95)
+                    .forecastYear(forecastYear)
+                    .forecastedConsumptionTwh(BigDecimal.valueOf(forecastedConsumption))
+                    .confidenceLevel(BigDecimal.valueOf(0.95))
                     .createdAt(LocalDateTime.now())
                     .build();
 
@@ -311,7 +312,7 @@ public class NeuralNetworkService {
     /**
      * Simple Neural Network implementation
      */
-    private static class NeuralNetwork {
+    private static class NeuralNetwork implements ParticleSwarmOptimizationService.NeuralNetwork {
         private final int inputSize;
         private final int hiddenSize;
         private final int outputSize;

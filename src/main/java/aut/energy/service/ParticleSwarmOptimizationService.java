@@ -1,5 +1,6 @@
 package aut.energy.service;
 
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -113,9 +114,13 @@ public class ParticleSwarmOptimizationService {
         double totalError = 0.0;
         int sampleCount = 0;
 
-        for (int i = 0; i < trainingData.inputs.size(); i++) {
-            double[] input = trainingData.inputs.get(i);
-            double[] expectedOutput = trainingData.outputs.get(i);
+        // ✅ FIX: use getters instead of fields
+        List<double[]> inputs = trainingData.getInputs();
+        List<double[]> outputs = trainingData.getOutputs();
+
+        for (int i = 0; i < inputs.size(); i++) {
+            double[] input = inputs.get(i);
+            double[] expectedOutput = outputs.get(i);
 
             // Forward pass
             double[] actualOutput = network.forward(input);

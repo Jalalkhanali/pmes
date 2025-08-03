@@ -2,6 +2,7 @@ package aut.energy.service;
 
 import aut.energy.entity.EnergyData;
 import aut.energy.repository.EnergyDataRepository;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
@@ -135,40 +136,44 @@ public class ExcelImportService {
      * Parse a single row of energy data
      */
     private EnergyData parseEnergyDataRow(Row row, Map<String, Integer> columnMap, String dataSource) {
-        // Extract year
+        // ✅ Extract the year from the row
         int year = getIntValue(row, columnMap.get("year"));
         if (year < 1900 || year > 2100) {
             throw new IllegalArgumentException("Invalid year: " + year);
         }
 
-        // Extract sector
+        // ✅ Extract the sector
         String sector = getStringValue(row, columnMap.get("sector"));
         if (sector == null || sector.trim().isEmpty()) {
             throw new IllegalArgumentException("Sector cannot be empty");
         }
 
-        // Extract energy source
+        // ✅ Extract the energy source
         String energySource = getStringValue(row, columnMap.get("energy_source"));
         if (energySource == null || energySource.trim().isEmpty()) {
             throw new IllegalArgumentException("Energy source cannot be empty");
         }
 
-        // Extract consumption
+        // ✅ Extract the consumption value
         double consumption = getDoubleValue(row, columnMap.get("consumption_twh"));
         if (consumption < 0) {
             throw new IllegalArgumentException("Consumption cannot be negative");
         }
 
-        // Create EnergyData entity
+        // ✅ Convert double to BigDecimal for better precision in DB
+        BigDecimal consumptionValue = BigDecimal.valueOf(consumption);
+
+        // ✅ Build and return the EnergyData entity
         return EnergyData.builder()
-                .year(year)
-                .sector(sector.trim())
-                .energySource(energySource.trim())
-                .consumptionTwh(consumption)
-                .dataSource(dataSource)
-                .importedAt(LocalDateTime.now())
-                .build();
+            .year(year)                                // Set forecast year
+            .sector(sector.trim())                     // Set trimmed sector name
+            .energySource(energySource.trim())         // Set trimmed energy source name
+            .consumptionTwh(consumptionValue)          // Use BigDecimal for precision
+            .dataSource(dataSource)                    // Set source of imported data
+            .createdAt(LocalDateTime.now())           // Timestamp when the row was imported
+            .build();
     }
+
 
     /**
      * Get integer value from cell

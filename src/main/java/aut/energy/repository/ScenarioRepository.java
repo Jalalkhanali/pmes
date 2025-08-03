@@ -54,7 +54,9 @@ public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
     /**
      * Find the currently active scenario
      */
-    Optional<Scenario> findByIsActiveTrue();
+    List<Scenario> findByIsActiveTrue();
+
+    List<Scenario> findByIsBaselineTrue();
 
     /**
      * Check if a scenario name exists
@@ -87,4 +89,10 @@ public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
            "ORDER BY s.startYear, s.name")
     List<Scenario> findScenariosOverlappingYearRange(@Param("startYear") Integer startYear, 
                                                     @Param("endYear") Integer endYear);
+
+    List<Scenario> findByStartYearLessThanEqualAndEndYearGreaterThanEqual(Integer startYear, Integer endYear);
+
+    @Query("SELECT s FROM Scenario s JOIN s.sectorGrowthRates sgr WHERE KEY(sgr) LIKE %:sector%")
+    List<Scenario> findBySectorGrowthRatesContaining(@Param("sector") String sector);
+
 } 

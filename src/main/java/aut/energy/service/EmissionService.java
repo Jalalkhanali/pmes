@@ -38,7 +38,7 @@ public class EmissionService {
         }
 
         Scenario scenario = scenarioOpt.get();
-        List<ForecastResult> forecasts = forecastResultRepository.findByScenario(scenario);
+        List<ForecastResult> forecasts = forecastResultRepository.findByScenarioOrderByForecastYearAscSectorAscEnergySourceAsc(scenario);
 
         return calculateEmissionsFromForecasts(forecasts);
     }
@@ -55,7 +55,7 @@ public class EmissionService {
         }
 
         Scenario scenario = scenarioOpt.get();
-        List<ForecastResult> forecasts = forecastResultRepository.findByScenarioAndYearBetween(scenario, startYear, endYear);
+        List<ForecastResult> forecasts = forecastResultRepository.findByScenarioAndForecastYearBetweenOrderByForecastYearAscSectorAscEnergySourceAsc(scenario, startYear, endYear);
 
         return calculateEmissionsFromForecasts(forecasts);
     }
@@ -165,15 +165,16 @@ public class EmissionService {
             }
 
             // Calculate emissions
-            double emissions = forecast.getForecastedConsumptionTwh() * factor.getEmissionFactorKgCo2PerTwh();
+            double emissions = forecast.getForecastedConsumptionTwh().doubleValue()
+                * factor.getCo2Factor().doubleValue();
 
             EmissionCalculation calculation = EmissionCalculation.builder()
-                    .year(forecast.getYear())
+                .year(forecast.getForecastYear())
                     .sector(forecast.getSector())
                     .energySource(forecast.getEnergySource())
-                    .energyConsumptionTwh(forecast.getForecastedConsumptionTwh())
+                    .energyConsumptionTwh(forecast.getForecastedConsumptionTwh().doubleValue())
                     .emissionsKgCo2(emissions)
-                    .emissionFactor(factor.getEmissionFactorKgCo2PerTwh())
+                    .emissionFactor(factor.getCo2Factor().doubleValue())
                     .build();
 
             calculations.add(calculation);

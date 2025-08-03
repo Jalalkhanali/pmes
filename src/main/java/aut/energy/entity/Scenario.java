@@ -3,6 +3,7 @@ package aut.energy.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -92,6 +93,27 @@ public class Scenario {
      */
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = false;
+
+    @Column(name = "is_base_line", nullable = false)
+    private Boolean isBaseline = false;
+
+    @ElementCollection
+    @CollectionTable(name = "scenario_sector_growth_rates", joinColumns = @JoinColumn(name = "scenario_id"))
+    @MapKeyColumn(name = "sector")
+    @Column(name = "growth_rate")
+    private Map<String, Double> sectorGrowthRates;
+
+    @ElementCollection
+    @CollectionTable(name = "scenario_energy_source_adjustments", joinColumns = @JoinColumn(name = "scenario_id"))
+    @MapKeyColumn(name = "energy_source")
+    @Column(name = "adjustment")
+    private Map<String, Double> energySourceAdjustments;
+
+    @ElementCollection
+    @CollectionTable(name = "scenario_yearly_factors", joinColumns = @JoinColumn(name = "scenario_id"))
+    @MapKeyColumn(name = "year")
+    @Column(name = "factor")
+    private Map<Integer, Double> yearlyFactors;
 
     /**
      * Created by user
