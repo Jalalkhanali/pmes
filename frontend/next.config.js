@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  output: 'standalone',   // ✅ THIS ENABLES standalone build
   images: {
     domains: ['localhost'],
   },
@@ -18,4 +19,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

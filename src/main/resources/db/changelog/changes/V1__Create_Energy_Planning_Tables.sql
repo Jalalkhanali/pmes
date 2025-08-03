@@ -3,80 +3,104 @@
 
 -- Energy Data Table
 CREATE TABLE energy_data (
-    id BIGSERIAL PRIMARY KEY,
-    year INTEGER NOT NULL,
-    sector VARCHAR(50) NOT NULL,
-    energy_source VARCHAR(50) NOT NULL,
-    consumption_twh DECIMAL(15,3) NOT NULL,
-    gdp_billions DECIMAL(15,3),
-    population_millions DECIMAL(10,2),
-    avg_temperature_celsius DECIMAL(5,2),
-    notes TEXT,
-    data_source VARCHAR(100),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
-    version BIGINT DEFAULT 0
+                             id BIGSERIAL PRIMARY KEY,
+                             year INTEGER NOT NULL,
+                             sector VARCHAR(50) NOT NULL,
+                             energy_source VARCHAR(50) NOT NULL,
+                             consumption_twh DECIMAL(15,3) NOT NULL,
+                             gdp_billions DECIMAL(15,3),
+                             population_millions DECIMAL(10,2),
+                             avg_temperature_celsius DECIMAL(5,2),
+                             notes TEXT,
+                             data_source VARCHAR(100),
+                             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                             updated_at TIMESTAMP,
+                             version BIGINT DEFAULT 0
 );
 
 -- Scenarios Table
 CREATE TABLE scenarios (
-    id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT,
-    scenario_type VARCHAR(50) NOT NULL,
-    start_year INTEGER NOT NULL,
-    end_year INTEGER NOT NULL,
-    gdp_growth_rate DECIMAL(5,2),
-    population_growth_rate DECIMAL(5,2),
-    efficiency_improvement_rate DECIMAL(5,2),
-    renewable_target DECIMAL(5,2),
-    carbon_price DECIMAL(10,2),
-    is_active BOOLEAN NOT NULL DEFAULT FALSE,
-    created_by VARCHAR(100),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
-    version BIGINT DEFAULT 0
+                           id BIGSERIAL PRIMARY KEY,
+                           name VARCHAR(100) NOT NULL UNIQUE,
+                           description TEXT,
+                           scenario_type VARCHAR(50) NOT NULL,
+                           start_year INTEGER NOT NULL,
+                           end_year INTEGER NOT NULL,
+                           gdp_growth_rate DECIMAL(5,2),
+                           population_growth_rate DECIMAL(5,2),
+                           efficiency_improvement_rate DECIMAL(5,2),
+                           renewable_target DECIMAL(5,2),
+                           carbon_price DECIMAL(10,2),
+                           is_active BOOLEAN NOT NULL DEFAULT FALSE,
+                           created_by VARCHAR(100),
+                           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                           updated_at TIMESTAMP,
+                           version BIGINT DEFAULT 0
 );
 
 -- Emission Factors Table
 CREATE TABLE emission_factors (
-    id BIGSERIAL PRIMARY KEY,
-    energy_source VARCHAR(50) NOT NULL,
-    sector VARCHAR(50) NOT NULL,
-    technology_type VARCHAR(100),
-    co2_factor DECIMAL(15,3) NOT NULL,
-    nox_factor DECIMAL(15,3),
-    so2_factor DECIMAL(15,3),
-    ch4_factor DECIMAL(15,3),
-    n2o_factor DECIMAL(15,3),
-    valid_year INTEGER NOT NULL,
-    data_source VARCHAR(200),
-    notes TEXT,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
-    version BIGINT DEFAULT 0
+                                  id BIGSERIAL PRIMARY KEY,
+                                  energy_source VARCHAR(50) NOT NULL,
+                                  sector VARCHAR(50) NOT NULL,
+                                  technology_type VARCHAR(100),
+                                  co2_factor DECIMAL(15,3) NOT NULL,
+                                  nox_factor DECIMAL(15,3),
+                                  so2_factor DECIMAL(15,3),
+                                  ch4_factor DECIMAL(15,3),
+                                  n2o_factor DECIMAL(15,3),
+                                  valid_year INTEGER NOT NULL,
+                                  data_source VARCHAR(200),
+                                  notes TEXT,
+                                  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                                  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                  updated_at TIMESTAMP,
+                                  version BIGINT DEFAULT 0
 );
 
 -- Forecast Results Table
 CREATE TABLE forecast_results (
-    id BIGSERIAL PRIMARY KEY,
-    scenario_id BIGINT NOT NULL REFERENCES scenarios(id),
-    forecast_year INTEGER NOT NULL,
-    sector VARCHAR(50) NOT NULL,
-    energy_source VARCHAR(50) NOT NULL,
-    forecasted_consumption_twh DECIMAL(15,3) NOT NULL,
-    lower_bound_twh DECIMAL(15,3),
-    upper_bound_twh DECIMAL(15,3),
-    confidence_level DECIMAL(3,2),
-    model_accuracy DECIMAL(10,4),
-    nn_architecture VARCHAR(500),
-    pso_parameters TEXT,
-    is_baseline BOOLEAN NOT NULL DEFAULT FALSE,
-    metadata TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP,
-    version BIGINT DEFAULT 0
+                                  id BIGSERIAL PRIMARY KEY,
+                                  scenario_id BIGINT NOT NULL REFERENCES scenarios(id),
+                                  forecast_year INTEGER NOT NULL,
+                                  sector VARCHAR(50) NOT NULL,
+                                  energy_source VARCHAR(50) NOT NULL,
+                                  forecasted_consumption_twh DECIMAL(15,3) NOT NULL,
+                                  lower_bound_twh DECIMAL(15,3),
+                                  upper_bound_twh DECIMAL(15,3),
+                                  confidence_level DECIMAL(3,2),
+                                  model_accuracy DECIMAL(10,4),
+                                  nn_architecture VARCHAR(500),
+                                  pso_parameters TEXT,
+                                  is_baseline BOOLEAN NOT NULL DEFAULT FALSE,
+                                  metadata TEXT,
+                                  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                  updated_at TIMESTAMP,
+                                  version BIGINT DEFAULT 0
+);
+
+-- ✅ NEW: Scenario Sector Growth Rates Table
+CREATE TABLE scenario_sector_growth_rates (
+                                              scenario_id BIGINT REFERENCES scenarios(id),
+                                              sector VARCHAR(50),
+                                              growth_rate DOUBLE PRECISION,
+                                              PRIMARY KEY (scenario_id, sector)
+);
+
+-- ✅ NEW: Scenario Energy Source Adjustments Table
+CREATE TABLE scenario_energy_source_adjustments (
+                                                    scenario_id BIGINT REFERENCES scenarios(id),
+                                                    energy_source VARCHAR(50),
+                                                    adjustment DOUBLE PRECISION,
+                                                    PRIMARY KEY (scenario_id, energy_source)
+);
+
+-- ✅ NEW: Scenario Yearly Factors Table
+CREATE TABLE scenario_yearly_factors (
+                                         scenario_id BIGINT REFERENCES scenarios(id),
+                                         year INTEGER,
+                                         factor DOUBLE PRECISION,
+                                         PRIMARY KEY (scenario_id, year)
 );
 
 -- Create indexes for better performance
@@ -113,4 +137,4 @@ ALTER TABLE emission_factors ADD CONSTRAINT chk_co2_factor_positive CHECK (co2_f
 ALTER TABLE emission_factors ADD CONSTRAINT chk_valid_year_range CHECK (valid_year >= 2000 AND valid_year <= 2050);
 
 ALTER TABLE forecast_results ADD CONSTRAINT chk_forecast_year_range CHECK (forecast_year >= 2020 AND forecast_year <= 2050);
-ALTER TABLE forecast_results ADD CONSTRAINT chk_consumption_positive CHECK (forecasted_consumption_twh > 0); 
+ALTER TABLE forecast_results ADD CONSTRAINT chk_consumption_positive CHECK (forecasted_consumption_twh > 0);

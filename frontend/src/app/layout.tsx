@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import Sidebar from '@/components/Layout/Sidebar';
+import {ClientLayout} from "@/components/Layout/ClientLayout";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -15,16 +15,6 @@ export const metadata: Metadata = {
   viewport: 'width=device-width, initial-scale=1',
 };
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
 
 export default function RootLayout({
   children,
@@ -34,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <QueryClientProvider client={queryClient}>
+      <ClientLayout>
           <div className="flex h-screen bg-gray-100">
             <Sidebar />
             <div className="flex-1 flex flex-col overflow-hidden">
@@ -67,7 +57,7 @@ export default function RootLayout({
               },
             }}
           />
-        </QueryClientProvider>
+      </ClientLayout>
       </body>
     </html>
   );

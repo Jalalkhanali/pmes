@@ -4,13 +4,14 @@ import { useQuery } from 'react-query';
 import { apiClient } from '@/lib/api';
 import { formatNumber, formatLargeNumber } from '@/lib/utils';
 import {
-  ChartBarIcon,
   DocumentChartBarIcon,
   ExclamationTriangleIcon,
   GlobeAltIcon,
-  TrendingUpIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
+
+import { ArrowTrendingUpIcon as TrendingUpIcon } from '@heroicons/react/24/outline';
+
 import { SECTORS, ENERGY_SOURCES } from '@/types';
 import DashboardChart from '@/components/Dashboard/DashboardChart';
 import RecentScenarios from '@/components/Dashboard/RecentScenarios';
